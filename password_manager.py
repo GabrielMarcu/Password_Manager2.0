@@ -25,14 +25,14 @@ class PasswordApp():
                 read = ''.join(fr.readlines())
             # print(read)
                 connection = sqlite3.connect("./Database/password_manager.db")
-                querry = "INSERT INTO app_table(user_id, app_name, username, password, email) VALUES(?,?,?,?,?)"
+                query = "INSERT INTO app_table(user_id, app_name, username, password, email) VALUES(?,?,?,?,?)"
                 # find_id = f"SELECT * FROM login_table WHERE username={read}"
                 cursor = connection.cursor()
                 # cursor.execute("SELECT count(*) FROM app_table;")
-                user_id = cursor.execute(f"SELECT id FROM login_table WHERE username={read}")
-                user_id = cursor.fetchone()[0]
-
-                cursor.execute(querry, (user_id, self.app_name, self.username, self.password, self.email))
+                id_query = cursor.execute(f"SELECT id FROM login_table WHERE username=?")
+                user_id = cursor.execute(id_query, read)
+                print(user_id)
+                cursor.execute(query, (user_id, self.app_name, self.username, self.password, self.email))
                 connection.commit()
                 connection.close()
                 messagebox.showinfo("Congrats!", "App successfully added in database")
