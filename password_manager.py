@@ -61,12 +61,12 @@ class PasswordApp():
         connection.close()
 
     @staticmethod
-    def get_app_list():
+    def get_app_list(id:str)->list:
         try:
             connection = sqlite3.connect("Database/password_manager.db")
             cur = connection.cursor()
-            find_app = "SELECT  app_name FROM app_table"
-            cur.execute(find_app)
+            find_app = "SELECT app_name FROM app_table WHERE user_id=?"
+            cur.execute(find_app, id)
             result = cur.fetchall()
             print(list(result))
             return result

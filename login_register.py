@@ -163,6 +163,26 @@ def forgot_password():
         win.destroy()
 
 
+def app_list():
+    # try:
+    with open("log.txt", 'r') as fr:
+        read = (''.join(fr.readlines()),)
+        connection = sqlite3.connect("./Database/password_manager.db")
+        querry = "SELECT id FROM login_table WHERE username=?"
+        cursor = connection.cursor()
+        cursor.execute(querry, read)
+        user_id = cursor.fetchall()[0][0]
+        print(user_id)
+        find_apps = "SELECT app_name FROM app_table WHERE user_id=?"
+        cursor.execute(find_apps, str(user_id))
+        ap_list = cursor.fetchall()
+        print(ap_list)
+        connection.commit()
+        connection.close()
+        return ap_list
+    # except Exception as e:
+    #     print(e, "happened in app_list function")
+
 def random_pass_generator() -> str:
     """
     Generates a string with random characters from a string containing 6 letters, 4 digits and 2 punctuation characters
@@ -659,22 +679,22 @@ select_app_label = Label(bg_label, text="GET PASSWORD", font=('Constntia', 20), 
 select_app_label.place(y=15, x=75)
 
 
-apps_l = pm.PasswordApp.get_app_list()
+apps_l = app_list()
 combobox_apps = ttk.Combobox(bg_label, width=25, font=('Constntia', 20), values=apps_l, )
 combobox_apps.set("Pick an app")
 combobox_apps.place(y=70, x=50)
 
-get_button = Button(bg_label, fg='#f8f8f8', text='Get', bg='#1D90F5', font=("yu gothic ui", 14, "bold"),
+get_button = Button(bg_label, fg='#f8f8f8', text='Get', bg='#1D90F5', font=("yu gothic ui", 14, "bold"), width=15,
                     cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
                     )
-get_button.place(y=100, x= 50)
+get_button.place(y=120, x=50)
 
 listbox_details = Listbox(bg_label, bg="#272A37", fg='white', width=25, font=('Constntia', 20))
 i = 1
 for app in apps_l:
     listbox_details.insert(i, app[0])
 
-listbox_details.place(y=150, x=50)
+listbox_details.place(y=170, x=50)
 
 # =================== Add new app Link=================
 bg_img_app2 = PhotoImage(file='assets/add_app.png')
