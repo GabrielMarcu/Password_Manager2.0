@@ -7,6 +7,8 @@ from tkinter import *
 from tkinter import messagebox, PhotoImage, ttk
 import sqlite3
 import password_manager as pm
+import random
+import string
 
 
 # from PIL import Image, ImageTk
@@ -161,6 +163,25 @@ def forgot_password():
         win.destroy()
 
 
+def random_pass_generator() -> str:
+    """
+    Generates a string with random characters from a string containing 6 letters, 4 digits and 2 punctuation characters
+    :return: a string of 12 random characters
+    """
+    try:
+        password = random.sample(string.ascii_letters, 8) + random.sample(string.digits, 5) \
+                   + random.sample(string.punctuation, 3)
+        random.shuffle(password)
+        result = ''.join(password)
+        return result
+    except Exception as e:
+        print(f'Unexpected error: {e}')
+
+
+# def insert_text():
+#     text = random_pass_generator()
+
+
 def add_new_app_frame():
     win = Toplevel()
     window_width = 400
@@ -178,14 +199,14 @@ def add_new_app_frame():
 
     # =================== New App Name ====================
     new_app_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
-                          bd=0)
+                          bd=0, fg='#FFFFFF')
     new_app_entry.place(x=40, y=80, width=266, height=50)
     new_app_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
     new_app_label = Label(win, text='• App Name', fg="#FFFFFF", bg='#272A37',
                           font=("yu gothic ui", 11, 'bold'))
     new_app_label.place(x=40, y=50)
     # ==================== New App Username =====================
-    new_user_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
+    new_user_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,fg='#FFFFFF',
                            bd=0)
     new_user_entry.place(x=40, y=170, width=266, height=50)
     new_user_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
@@ -193,7 +214,7 @@ def add_new_app_frame():
                            font=("yu gothic ui", 11, 'bold'))
     new_user_label.place(x=40, y=140)
     # ===================== New App Password =====================
-    new_pass_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
+    new_pass_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
                            bd=0)
     new_pass_entry.place(x=40, y=260, width=266, height=50)
     new_pass_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
@@ -201,7 +222,7 @@ def add_new_app_frame():
                            font=("yu gothic ui", 11, 'bold'))
     new_pass_label.place(x=40, y=230)
     # ====================== New App Email =======================
-    new_email_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
+    new_email_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
                             bd=0)
     new_email_entry.place(x=40, y=350, width=266, height=50)
     new_email_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
@@ -211,6 +232,7 @@ def add_new_app_frame():
     # ====================== Random and Submit buttons ====================
     random_btn = Button(win, fg='#f8f8f8', text='Random', bg='#1D90F5', font=("yu gothic ui", 12, "bold"),
                         cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
+                        command=lambda: new_pass_entry.insert(0, random_pass_generator())
                         )
     random_btn.place(x=40, y=410, width=128, height=45)
 
@@ -252,7 +274,7 @@ def show_frame(the_frame):
     the_frame.tkraise()
 
 
-show_frame(login)
+show_frame(frame_app)
 
 # ================================================
 # +++++++++++SIGN UP PAGE STARTS HERE+++++++++++++
@@ -624,46 +646,34 @@ forgot_password_btn = Button(
 forgot_password_btn.place(x=210, y=400, width=150, height=35)
 
 # ================================================
-# +++++++++ Application GUI starts here ++++++++++
+# ++++++++++ Application starts here +++++++++++++
 # ================================================
 
 frame_app.configure(bg='#272A37')
 bg_img: PhotoImage = PhotoImage(file="assets\\image_1.png")
 bg_label = Label(frame_app, image=bg_img)
 
-# ============== Get Password Link======================
-# get_password_label = Label(bg_label, text="***GET PASSWORD***", bg='#E9C9B1', font=("yu gothic ui Bold", 32 * -1),
-#                            width=26, height=1
-#                            )
-# get_password_label.place(y=15, x=120)
-# get_bg_label = Label()
-#
-# bg_img_app1 = PhotoImage(file="assets/get_pass.png")
-# get_password_btn = Button(bg_label, image=bg_img_app1, bg="#272A37", font=("yu gothic ui Bold", 36 * -1),
-#                           cursor='hand2',
-#                           command=lambda: show_frame(get_pass_frame)
-#                           )
-# get_password_btn.place(y=70, x=120)
-# get_password_label = Label(bg_label, text="***GET PASSWORD***", bg='#E9C9B1', font=("yu gothic ui Bold", 32 * -1),
-#                            width=26, height=1
-#                            )
-# get_password_label.place(y=15, x=120)
-
 # ==============GET PASS FRAME=====================
-
 # get_pass_frame.configure(bg='#E9C9B1')
 select_app_label = Label(bg_label, text="GET PASSWORD", font=('Constntia', 20), bg='#272A37', fg="white")
 select_app_label.place(y=15, x=75)
+
 
 apps_l = pm.PasswordApp.get_app_list()
 combobox_apps = ttk.Combobox(bg_label, width=25, font=('Constntia', 20), values=apps_l, )
 combobox_apps.set("Pick an app")
 combobox_apps.place(y=70, x=50)
 
+get_button = Button(bg_label, fg='#f8f8f8', text='Get', bg='#1D90F5', font=("yu gothic ui", 14, "bold"),
+                    cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
+                    )
+get_button.place(y=100, x= 50)
+
 listbox_details = Listbox(bg_label, bg="#272A37", fg='white', width=25, font=('Constntia', 20))
 i = 1
 for app in apps_l:
     listbox_details.insert(i, app[0])
+
 listbox_details.place(y=150, x=50)
 
 # =================== Add new app Link=================

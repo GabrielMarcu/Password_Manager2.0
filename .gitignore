@@ -3,3 +3,4 @@ Database/app_database.db
 Database/login_database.db
 .idea/
 test.py
+log.txt

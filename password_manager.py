@@ -22,20 +22,21 @@ class PasswordApp():
 
         try:
             with open("log.txt", 'r') as fr:
-                read = ''.join(fr.readlines())
-            # print(read)
-                connection = sqlite3.connect("./Database/password_manager.db")
-                query = "INSERT INTO app_table(user_id, app_name, username, password, email) VALUES(?,?,?,?,?)"
-                # find_id = f"SELECT * FROM login_table WHERE username={read}"
-                cursor = connection.cursor()
-                # cursor.execute("SELECT count(*) FROM app_table;")
-                id_query = cursor.execute(f"SELECT id FROM login_table WHERE username=?")
-                user_id = cursor.execute(id_query, read)
-                print(user_id)
-                cursor.execute(query, (user_id, self.app_name, self.username, self.password, self.email))
-                connection.commit()
-                connection.close()
-                messagebox.showinfo("Congrats!", "App successfully added in database")
+                read = (''.join(fr.readlines()),)
+                # print(read)
+            connection = sqlite3.connect("./Database/password_manager.db")
+            query = "INSERT INTO app_table(user_id, app_name, username, password, email) VALUES(?,?,?,?,?)"
+            # find_id = f"SELECT * FROM login_table WHERE username={read}"
+            cursor = connection.cursor()
+            # cursor.execute("SELECT count(*) FROM app_table;")
+            find_id = "SELECT id FROM login_table WHERE username=?"
+            cursor.execute(find_id, read)
+            user_id = cursor.fetchall()[0][0]
+            print(user_id)
+            cursor.execute(query, (user_id, self.app_name, self.username, self.password, self.email))
+            connection.commit()
+            connection.close()
+            messagebox.showinfo("Congrats!", "App successfully added in database")
 
         except sqlite3.IntegrityError as e:
             messagebox.showerror("Attention!", "App already registered in database")
@@ -78,8 +79,8 @@ class PasswordApp():
 
 
 if __name__ == "__main__":
-    # new_app = PasswordApp('youtube', 'gabi', '12345', 'gabi@gmail.com')
-    # new_app.register_app()
+    new_app = PasswordApp('youtube', 'gabi', '12345', 'gabi@gmail.com')
+    new_app.register_app()
     # PasswordApp.remove_app('git')
     # PasswordApp.empty_db()
     # #
