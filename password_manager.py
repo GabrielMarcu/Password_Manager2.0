@@ -5,11 +5,7 @@ import sqlite3
 from tkinter import messagebox
 
 
-# import login_register as log
-
-
 class PasswordApp():
-
 
     def __init__(self, app_name, username, password, email):
 
@@ -19,19 +15,16 @@ class PasswordApp():
         self.email = email
 
     def register_app(self):
-
         try:
             with open("log.txt", 'r') as fr:
-                read = (''.join(fr.readlines()),)
+                user_id = ''.join(fr.readlines())
                 # print(read)
+
             connection = sqlite3.connect("./Database/password_manager.db")
             query = "INSERT INTO app_table(user_id, app_name, username, password, email) VALUES(?,?,?,?,?)"
             # find_id = f"SELECT * FROM login_table WHERE username={read}"
             cursor = connection.cursor()
-            # cursor.execute("SELECT count(*) FROM app_table;")
-            find_id = "SELECT id FROM login_table WHERE username=?"
-            cursor.execute(find_id, read)
-            user_id = cursor.fetchall()[0][0]
+
             print(user_id)
             cursor.execute(query, (user_id, self.app_name, self.username, self.password, self.email))
             connection.commit()
@@ -61,7 +54,7 @@ class PasswordApp():
         connection.close()
 
     @staticmethod
-    def get_app_list(id:str)->list:
+    def get_app_list(id: str) -> list:
         try:
             connection = sqlite3.connect("Database/password_manager.db")
             cur = connection.cursor()
@@ -74,13 +67,20 @@ class PasswordApp():
             print(f'{e}, error in get_app_list')
 
     @staticmethod
-    def random_pass():
-        pass
+    def update_details(app_name, username, password, email):
+        connection = sqlite3.connect('Database/password_manager.db')
+        query = """UPDATE app_table SET username = ?,  password = ?, email = ?
+                    WHERE app_name = ?"""
+        cursor = connection.cursor()
+        cursor.execute(query, (username, password, email, app_name))
+        connection.commit()
+        connection.close()
+
 
 
 if __name__ == "__main__":
-    new_app = PasswordApp('youtube', 'gabi', '12345', 'gabi@gmail.com')
-    new_app.register_app()
+    # new_app = PasswordApp('youtube', 'gabi', '12345', 'gabi@gmail.com')
+    # new_app.register_app()
     # PasswordApp.remove_app('git')
     # PasswordApp.empty_db()
     # #
@@ -91,4 +91,5 @@ if __name__ == "__main__":
     # new_app4 = PasswordApp('aaa', 'gabi', "1111", 'ga@gmail.com')
     # new_app4.register_app()
     # print(PasswordApp.id)
-    PasswordApp.get_app_list()
+    # PasswordApp.get_app_list()
+    pass

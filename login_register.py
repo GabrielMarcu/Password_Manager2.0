@@ -58,21 +58,28 @@ def login_user():
         connection = sqlite3.connect("Database/password_manager.db")
         cur = connection.cursor()
         find_user = "SELECT * FROM login_table WHERE username = ? and password = ?;"
+        get_id = "SELECT id FROM login_table WHERE username = ? and password = ?;"
         cur.execute(find_user, [(login_username_entry.get()), (login_password_name_entry.get())])
-
         result = cur.fetchall()
-
+        cur.execute(get_id, [(login_username_entry.get()), (login_password_name_entry.get())])
+        user_id = cur.fetchall()[0][0]
+        print('list ok')
+        print(user_id, "in login_user function")
         if result:
             with open('log.txt', 'w') as fw:
-                fw.write(login_username_entry.get())
+                fw.write(str(user_id))
+
             clear_login()
             messagebox.showinfo("Success", "Logged in Successfully")
             show_frame(frame_app)
+            combobox_apps.config(values=app_list())
+            print("list ok")
+            combobox_apps.set("Pick an app")
+
         elif login_username_entry.get() == "" or login_password_name_entry.get() == "":
             messagebox.showerror("Warning", 'All fields are required')
         else:
             messagebox.showerror("Failed", "Incorrect username or password, pleas try again or sign up")
-
     except Exception as e:
         messagebox.showerror("Error", "Something went wrong, please try again")
         print(f'{e} happens after login_user')
@@ -163,29 +170,61 @@ def forgot_password():
         win.destroy()
 
 
+def logout():
+    show_frame(login)
+    listbox_details.delete(0, END)
+    combobox_apps.delete(0, END)
+
+
+def app_details():
+    try:
+        listbox_details.delete(0, END)
+        with open("log.txt", 'r') as fr:
+            user_id = ''.join(fr.readlines())
+            app_name = combobox_apps.get()
+            connection = sqlite3.connect("./Database/password_manager.db")
+            cursor = connection.cursor()
+            details_query = "SELECT * FROM app_table WHERE user_id=? and app_name=?"
+            cursor.execute(details_query, (user_id, app_name))
+            details_list = cursor.fetchmany()
+            print(details_list)
+            for detail in details_list:
+                listbox_details.insert(END, "USER ID->", detail[0])
+                listbox_details.insert(END, "APP NAME->", detail[1])
+                listbox_details.insert(END, "USERNAME->", detail[2])
+                listbox_details.insert(END, "PASSWORD->", detail[3])
+                listbox_details.insert(END, "EMAIL->", detail[4])
+
+
+    except Exception as e:
+        print(f'{e} -> happened in app_details')
+
+
 def app_list():
     # try:
-    with open("log.txt", 'r') as fr:
-        read = (''.join(fr.readlines()),)
-        connection = sqlite3.connect("./Database/password_manager.db")
-        querry = "SELECT id FROM login_table WHERE username=?"
-        cursor = connection.cursor()
-        cursor.execute(querry, read)
-        user_id = cursor.fetchall()[0][0]
-        print(user_id)
-        find_apps = "SELECT app_name FROM app_table WHERE user_id=?"
-        cursor.execute(find_apps, str(user_id))
-        ap_list = cursor.fetchall()
-        print(ap_list)
-        connection.commit()
-        connection.close()
+    try:
+        with open("log.txt", 'r') as fr:
+            user_id = (''.join(fr.readlines()),)
+            print(user_id)
+            connection = sqlite3.connect("./Database/password_manager.db")
+            cursor = connection.cursor()
+            find_apps = "SELECT app_name FROM app_table WHERE user_id=?"
+            cursor.execute(find_apps, user_id)
+            ap_list = cursor.fetchall()
+            print(ap_list)
+            connection.commit()
+            connection.close()
+            return ap_list
+    except IndexError as e:
+        ap_list = []
         return ap_list
     # except Exception as e:
     #     print(e, "happened in app_list function")
 
+
 def random_pass_generator() -> str:
     """
-    Generates a string with random characters from a string containing 6 letters, 4 digits and 2 punctuation characters
+    Generates a string with random characters from a string containing 8 letters, 5 digits and 3 punctuation characters
     :return: a string of 12 random characters
     """
     try:
@@ -196,6 +235,15 @@ def random_pass_generator() -> str:
         return result
     except Exception as e:
         print(f'Unexpected error: {e}')
+
+
+def register_new_app(app_name, new_username_entry, password_entry, new_email):
+    if app_name == "" or new_username_entry == "" or password_entry == "" or new_email == "":
+        messagebox.showerror("Error", "All Fields Are Required")
+    else:
+        pm.PasswordApp(app_name, new_username_entry, password_entry, new_email).register_app()
+        combobox_apps.config(values=app_list())
+        combobox_apps.set("Pick an App")
 
 
 # def insert_text():
@@ -226,7 +274,7 @@ def add_new_app_frame():
                           font=("yu gothic ui", 11, 'bold'))
     new_app_label.place(x=40, y=50)
     # ==================== New App Username =====================
-    new_user_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,fg='#FFFFFF',
+    new_user_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
                            bd=0)
     new_user_entry.place(x=40, y=170, width=266, height=50)
     new_user_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
@@ -258,10 +306,68 @@ def add_new_app_frame():
 
     submit_btn = Button(win, fg='#f8f8f8', text='Save', bg='#1D90F5', font=("yu gothic ui", 12, "bold"),
                         cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
-                        command=lambda: pm.PasswordApp(new_app_entry.get(), new_user_entry.get(), new_pass_entry.get(),
-                                                       new_email_entry.get()).register_app()
+                        command=lambda: register_new_app(new_app_entry.get(), new_user_entry.get(),
+                                                         new_pass_entry.get(),
+                                                         new_email_entry.get())
                         )
     submit_btn.place(x=178, y=410, width=128, height=45)
+
+
+def update_details_window():
+    win = Toplevel()
+    window_width = 400
+    window_height = 550
+    screen_width = win.winfo_screenwidth()
+    screen_height = win.winfo_screenheight()
+    position_top = int(screen_height / 4 - window_height / 4)
+    position_right = int(screen_width / 2 - window_width / 2)
+    win.geometry(f'{window_width}x{window_height}+{position_right}+{position_top}')
+
+    win.title('Add new app')
+    # win.iconbitmap('images\\aa.ico')
+    win.configure(background='#272A37')
+    win.resizable(False, False)
+
+    # ==================== Update App Username =====================
+    update_username_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
+                                  fg='#FFFFFF',
+                                  bd=0)
+    update_username_entry.place(x=40, y=170, width=266, height=50)
+    update_username_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
+    update_username_label = Label(win, text='• New Username', fg="#FFFFFF", bg='#272A37',
+                                  font=("yu gothic ui", 11, 'bold'))
+    update_username_label.place(x=40, y=140)
+    # ===================== Update App Password =====================
+    update_pass_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
+                              bd=0)
+    update_pass_entry.place(x=40, y=260, width=266, height=50)
+    update_pass_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
+    update_pass_label = Label(win, text='• New Password', fg="#FFFFFF", bg='#272A37',
+                              font=("yu gothic ui", 11, 'bold'))
+    update_pass_label.place(x=40, y=230)
+    # ====================== Update App Email =======================
+    update_email_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
+                               fg='#FFFFFF',
+                               bd=0)
+    update_email_entry.place(x=40, y=350, width=266, height=50)
+    update_email_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
+    update_email_label = Label(win, text='• Email', fg="#FFFFFF", bg='#272A37',
+                               font=("yu gothic ui", 11, 'bold'))
+    update_email_label.place(x=40, y=320)
+    # ====================== Random and Submit buttons ====================
+    change_btn = Button(win, fg='#f8f8f8', text='Submit Changes', bg='#1D90F5', font=("yu gothic ui", 12, "bold"),
+                        cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
+                        command=lambda: update_details(combobox_apps.get(), update_username_entry.get(),
+                                                       update_pass_entry.get(), update_email_entry.get())
+                        )
+    change_btn.place(x=40, y=410, width=128, height=45)
+
+    def update_details(app_name, update_username, update_password, update_email):
+        pm.PasswordApp.update_details(app_name, update_username, update_password, update_email)
+        exit_window()
+    def exit_window():
+        win.destroy()
+
 
 
 # Windows Size and Placement
@@ -294,7 +400,7 @@ def show_frame(the_frame):
     the_frame.tkraise()
 
 
-show_frame(frame_app)
+show_frame(login)
 
 # ================================================
 # +++++++++++SIGN UP PAGE STARTS HERE+++++++++++++
@@ -429,7 +535,7 @@ passwordName_icon_Label = Label(passwordName_image_Label, image=passwordName_ico
 passwordName_icon_Label.place(x=159, y=15)
 
 passwordName_entry = Entry(passwordName_image_Label, bd=0, bg="#3D404B", highlightthickness=0,
-                           font=("yu gothic ui SemiBold", 16 * -1), textvariable=password
+                           font=("yu gothic ui SemiBold", 16 * -1), textvariable=password, show="*",
                            )
 passwordName_entry.place(x=8, y=17, width=140, height=27)
 
@@ -448,7 +554,7 @@ confirm_passwordName_icon_Label = Label(confirm_passwordName_image_Label, image=
 confirm_passwordName_icon_Label.place(x=159, y=15)
 
 confirm_passwordName_entry = Entry(confirm_passwordName_image_Label, bd=0, bg="#3D404B", highlightthickness=0,
-                                   font=("yu gothic ui SemiBold", 16 * -1), textvariable=confirm_password,
+                                   font=("yu gothic ui SemiBold", 16 * -1), textvariable=confirm_password, show="*"
                                    )
 confirm_passwordName_entry.place(x=8, y=17, width=140, height=27)
 
@@ -477,7 +583,7 @@ headerText3 = Label(
     font=("yu gothic ui bold", 20 * -1),
     bg="#272A37"
 )
-headerText3.place(x=700, y=530)
+headerText3.place(x=680, y=480)
 
 # ===================================================================
 # +++++++++++++++++++++ LOGIN PAGE STARTS HERE+++++++++++++++++++++++
@@ -648,7 +754,7 @@ login_header_text3 = Label(
     font=("yu gothic ui bold", 20 * -1),
     bg="#272A37"
 )
-login_header_text3.place(x=700, y=530)
+login_header_text3.place(x=680, y=480)
 
 # ================ Forgot Password ====================
 forgot_password_btn = Button(
@@ -678,22 +784,24 @@ bg_label = Label(frame_app, image=bg_img)
 select_app_label = Label(bg_label, text="GET PASSWORD", font=('Constntia', 20), bg='#272A37', fg="white")
 select_app_label.place(y=15, x=75)
 
-
 apps_l = app_list()
+
 combobox_apps = ttk.Combobox(bg_label, width=25, font=('Constntia', 20), values=apps_l, )
 combobox_apps.set("Pick an app")
 combobox_apps.place(y=70, x=50)
 
 get_button = Button(bg_label, fg='#f8f8f8', text='Get', bg='#1D90F5', font=("yu gothic ui", 14, "bold"), width=15,
                     cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
+                    command=app_details
                     )
 get_button.place(y=120, x=50)
+update_button = Button(bg_label, fg='#f8f8f8', text='Update', bg='#1D90F5', font=("yu gothic ui", 14, "bold"), width=15,
+                       cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
+                       command=update_details_window
+                       )
+update_button.place(y=120, x=260)
 
 listbox_details = Listbox(bg_label, bg="#272A37", fg='white', width=25, font=('Constntia', 20))
-i = 1
-for app in apps_l:
-    listbox_details.insert(i, app[0])
-
 listbox_details.place(y=170, x=50)
 
 # =================== Add new app Link=================
@@ -703,16 +811,25 @@ add_password_btn = Button(bg_label, image=bg_img_app2, bg="#272A37", font=("yu g
                           command=add_new_app_frame
                           )
 add_password_btn.place(y=198, x=527)
-add_password_label = Label(bg_label, text="+++ADD NEW APP+++", bg='#272A37', font=("yu gothic ui Bold", 20 * -1),
+add_password_label = Label(bg_label, text="ADD NEW APP", bg='#272A37', font=("yu gothic ui Bold", 20 * -1),
                            width=21, height=1, fg='white',
                            )
 add_password_label.place(y=160, x=527)
 # ================= Log out ==================
 logout_btn = Button(bg_label, bg='#149414', text="LOG OUT", width='10', height='2', cursor="hand2",
-                    command=lambda: show_frame(login)
+                    command=lambda: logout()
                     )
 logout_btn.place(y=15, x=870)
 bg_label.pack()
+
+app_header_text = Label(
+    bg_label,
+    text="Powered by Marcu Gabriel",
+    fg="#FFFFFF",
+    font=("yu gothic ui bold", 20 * -1),
+    bg="#272A37"
+)
+app_header_text.place(x=680, y=480)
 
 password_manager.resizable(False, False)
 password_manager.mainloop()
