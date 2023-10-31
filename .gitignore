@@ -1,6 +1,5 @@
 pm_env/
-Database/app_database.db
-Database/login_database.db
+Database/password_manager.db
 .idea/
 test.py
 log.txt
