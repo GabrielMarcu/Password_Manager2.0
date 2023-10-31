@@ -1,51 +1,63 @@
 """
-Create objects of type PasswordApp and saves them into database or remove them from there
+Class PasswordApp with its methods:
+### register_app #Saves PasswordApp object into database
+
+### remove_app ->Removes PasswordApp object from database
+
+### empty_app_table ->Deletes all PasswordApp objects from app_table in database
+
+### get_app_list ->Returns a list of app names from database for a specific user_id
+
+### update_details ->Modifies username, password and email for a specific app_name and user_id in database
 """
+
 import sqlite3
 from tkinter import messagebox
 
 
-class PasswordApp():
-
+class PasswordApp:
+    """
+    Creates, updates objects in database or removes objects from database
+    """
     def __init__(self, app_name, username, password, email):
-
         self.app_name = app_name
         self.username = username
         self.password = password
         self.email = email
 
-    def register_app(self):
+    def register_app(self, user_id: str) -> None:
+        """
+        Saves PasswordApp object into database
+        """
         try:
-            with open("log.txt", 'r') as fr:
-                user_id = ''.join(fr.readlines())
-                # print(read)
-
             connection = sqlite3.connect("./Database/password_manager.db")
             query = "INSERT INTO app_table(user_id, app_name, username, password, email) VALUES(?,?,?,?,?)"
-            # find_id = f"SELECT * FROM login_table WHERE username={read}"
             cursor = connection.cursor()
-
-            print(user_id)
             cursor.execute(query, (user_id, self.app_name, self.username, self.password, self.email))
             connection.commit()
             connection.close()
             messagebox.showinfo("Congrats!", "App successfully added in database")
-
         except sqlite3.IntegrityError as e:
             messagebox.showerror("Attention!", "App already registered in database")
 
     @staticmethod
-    def remove_app(existing_app_name):
+    def remove_app(existing_app_name: str, user_id: str) -> None:
+        """
+        Removes PasswordApp object from database
+        """
         connection = sqlite3.connect("./Database/password_manager.db")
-        querry = f"DELETE FROM app_table WHERE app_name='{existing_app_name}'"
+        query = "DELETE FROM app_table WHERE app_name=? and user_id=?"
         cursor = connection.cursor()
-        cursor.execute(querry)
+        cursor.execute(query, (existing_app_name, user_id))
         connection.commit()
         connection.close()
         messagebox.showinfo("Success", "Application login info removed from database")
 
     @staticmethod
-    def empty_db():
+    def empty_app_table_db():
+        """
+        Deletes all PasswordApp objects from app_table in database
+        """
         connection = sqlite3.connect("./Database/password_manager.db")
         querry = "DELETE FROM app_table"
         cursor = connection.cursor()
@@ -54,25 +66,34 @@ class PasswordApp():
         connection.close()
 
     @staticmethod
-    def get_app_list(id: str) -> list:
+    def get_app_list(user_id: str) -> list:
+        """
+        Returns a list of app names from database for a specific user_id
+        """
         try:
             connection = sqlite3.connect("Database/password_manager.db")
             cur = connection.cursor()
             find_app = "SELECT app_name FROM app_table WHERE user_id=?"
-            cur.execute(find_app, id)
+            cur.execute(find_app, user_id)
             result = cur.fetchall()
             print(list(result))
             return result
-        except Exception as e:
-            print(f'{e}, error in get_app_list')
+        except IndexError as e:
+            result = []
+            return result
+
+            # print(f'{e}, error in get_app_list')
 
     @staticmethod
-    def update_details(app_name, username, password, email):
+    def update_details(user_id: str, app_name: str, username: str, password: str, email: str) -> None:
+        """
+        Modifies username, password and email for a specific app_name and user_id in database
+        """
         connection = sqlite3.connect('Database/password_manager.db')
         query = """UPDATE app_table SET username = ?,  password = ?, email = ?
-                    WHERE app_name = ?"""
+                    WHERE app_name = ? and user_id=?"""
         cursor = connection.cursor()
-        cursor.execute(query, (username, password, email, app_name))
+        cursor.execute(query, (username, password, email, app_name, user_id))
         connection.commit()
         connection.close()
 
@@ -81,9 +102,8 @@ class PasswordApp():
 if __name__ == "__main__":
     # new_app = PasswordApp('youtube', 'gabi', '12345', 'gabi@gmail.com')
     # new_app.register_app()
-    # PasswordApp.remove_app('git')
+    # PasswordApp.remove_app('instagram', '6')
     # PasswordApp.empty_db()
-    # #
     # new_app2 = PasswordApp('google', 'gabi_google', 'g00613', 'gabi@gmail.com')
     # new_app2.register_app()
     # new_app3 = PasswordApp('git', 'gabi', "1111", 'g@gmail.com')
