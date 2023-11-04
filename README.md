@@ -63,7 +63,7 @@ Class PasswordApp with its methods:
     > pip install -r requirements.txt
 
 ## Maintainer 
-Firstname Lastname - firstname.lastname@mail.com
+Gabriel Marcu - gabriel.marcu93@gmail.com
 
 # Videos
 ### GUI Video
