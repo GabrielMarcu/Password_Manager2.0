@@ -1,5 +1,5 @@
 """
-First of all run Database/create_database.py
+First of all runs Database/create_database.py
 
 Tkinter GUI used for saving account details for any aplication the user wants.
 
@@ -17,8 +17,13 @@ Functions:
 
 -->change_password -> Resets login password, based on email from database
 
--->...
+-->get_app list -> Returns a list of all apps registered in database for a specific user_id
+
+-->app_details -> Returns a list of login details of the selected app
+
+-->update_details_window -> Opens a new window used for updating login info about and app
 """
+
 from tkinter import *
 from tkinter import messagebox, PhotoImage, ttk
 import sqlite3
@@ -33,6 +38,8 @@ create_database.login_db()
 # ===============================
 # DATABASE CONNECTION FOR SIGN UP
 # ===============================
+
+
 def signup():
     """
     Used for SUBMIT button in Sign up frame.
@@ -719,7 +726,7 @@ app_header_text = Label(bg_label, text="Powered by Marcu Gabriel", fg="#FFFFFF",
 app_header_text.place(x=680, y=480)
 
 
-password_manager.resizable(False, False)
+# password_manager.resizable(False, False)
 password_manager.mainloop()
 
 if __name__ == "__main__":
