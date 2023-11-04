@@ -1,8 +1,11 @@
 """
+First of all run Database/create_database.py
+
 Tkinter GUI used for saving account details for any aplication the user wants.
 
 FRAMES: login, sign_up, frame_app
 
+global variables: user_id,  apps_l(a list of apps for a specific user_id)
 
 Functions:
 
@@ -14,7 +17,7 @@ Functions:
 
 -->change_password -> Resets login password, based on email from database
 
--->
+-->...
 """
 from tkinter import *
 from tkinter import messagebox, PhotoImage, ttk
@@ -24,9 +27,8 @@ import random
 import string
 from Database import create_database
 
-
-# from PIL import Image, ImageTk
-
+create_database.app_db()
+create_database.login_db()
 
 # ===============================
 # DATABASE CONNECTION FOR SIGN UP
@@ -86,7 +88,6 @@ def login_user():
         result = cur.fetchall()
         if result:
             user_id = result[0][0]
-            print(user_id, "in login_user function")
             combobox_apps.config(values=app_list())
             combobox_apps.set("Pick an app")
             clear_login()
@@ -241,101 +242,90 @@ def random_pass_generator() -> str:
     :return: a string of 16 random characters
     """
     try:
-        password = random.sample(string.ascii_letters, 8) + random.sample(string.digits, 5) \
+        rand_password = random.sample(string.ascii_letters, 8) + random.sample(string.digits, 5) \
                    + random.sample(string.punctuation, 3)
-        random.shuffle(password)
-        result = ''.join(password)
+        random.shuffle(rand_password)
+        result = ''.join(rand_password)
         return result
     except Exception as e:
         print(f'Unexpected error: {e}')
 
 
-def register_new_app(app_name: str, new_username_entry: str, password_entry: str, confirm_password_entry:str, new_email: str) -> None:
-    """
-    Registers new application in database for one user_id
-    """
-    newpassword = str(password_entry)
-    confirm_newpassword = str(confirm_password_entry)
-    global user_id
-    if app_name == "" or new_username_entry == "" or password_entry == "" or new_email == "":
-        messagebox.showerror("Error", "All Fields Are Required")
-    elif newpassword != confirm_newpassword:
-        messagebox.showerror("Failed", "Passwords did not match")
-    else:
-        pm.PasswordApp(app_name, new_username_entry, password_entry, new_email).register_app(user_id)
-        combobox_apps.config(values=app_list())
-        combobox_apps.set("Pick an App")
-
+def remove_app():
+    pm.AppLoginInfo.remove_app(combobox_apps.get(), user_id)
+    apps = app_list()
+    combobox_apps.config(values=apps)
+    combobox_apps.set("Pick an App")
 
 def add_new_app_frame():
     """
     Opens new window used for adding new application login info into database
     """
-    win = Toplevel()
+    window = Toplevel()
     window_width = 380
     window_height = 550
-    screen_width = win.winfo_screenwidth()
-    screen_height = win.winfo_screenheight()
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
     position_top = int(screen_height / 4 - window_height / 4)
     position_right = int(screen_width / 2 - window_width / 2)
-    win.geometry(f'{window_width}x{window_height}+{position_right}+{position_top}')
+    window.geometry(f'{window_width}x{window_height}+{position_right}+{position_top}')
 
-    win.title('Add new app')
-    win.configure(background='#272A37')
-    win.resizable(False, False)
+    window.title('Add new app')
+    window.configure(background='#272A37')
+    window.resizable(False, False)
 
     # =================== New App Name ====================
-    new_app_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
+    new_app_entry = Entry(window, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
                           bd=0, fg='#FFFFFF')
     new_app_entry.place(x=40, y=60, width=266, height=50)
     new_app_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
-    new_app_label = Label(win, text='• App Name', fg="#FFFFFF", bg='#272A37',
+    new_app_label = Label(window, text='• App Name', fg="#FFFFFF", bg='#272A37',
                           font=("yu gothic ui", 11, 'bold'))
     new_app_label.place(x=40, y=30)
 
     # ==================== New App Username =====================
-    new_user_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
+    new_user_entry = Entry(window, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
                            bd=0)
     new_user_entry.place(x=40, y=150, width=266, height=50)
     new_user_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
-    new_user_label = Label(win, text='• Username', fg="#FFFFFF", bg='#272A37',
+    new_user_label = Label(window, text='• Username', fg="#FFFFFF", bg='#272A37',
                            font=("yu gothic ui", 11, 'bold'))
     new_user_label.place(x=40, y=120)
 
     # ===================== New App Password =====================
-    new_pass_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
+    new_pass_entry = Entry(window, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
                            bd=0, show="*")
     new_pass_entry.place(x=40, y=240, width=266, height=50)
     new_pass_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
-    new_pass_label = Label(win, text='• Password', fg="#FFFFFF", bg='#272A37',
+    new_pass_label = Label(window, text='• Password', fg="#FFFFFF", bg='#272A37',
                            font=("yu gothic ui", 11, 'bold'))
     new_pass_label.place(x=40, y=210)
 
-    new_confirm_pass_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
+    new_confirm_pass_entry = Entry(window, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1,
                                    fg='#FFFFFF', bd=0, show="*",
                                    )
     new_confirm_pass_entry.place(x=40, y=330, width=266, height=50)
-    new_confirm_pass_label = Label(win, text='• Confirm Password', fg="#FFFFFF", bg='#272A37',
+    new_confirm_pass_label = Label(window, text='• Confirm Password', fg="#FFFFFF", bg='#272A37',
                                    font=("yu gothic ui", 11, 'bold')
                                    )
     new_confirm_pass_label.place(x=40, y=300)
 
     # ====================== New App Email =======================
-    new_email_entry = Entry(win, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
+    new_email_entry = Entry(window, bg="#3D404B", font=("yu gothic ui semibold", 12), highlightthickness=1, fg='#FFFFFF',
                             bd=0)
     new_email_entry.place(x=40, y=420, width=266, height=50)
     new_email_entry.config(highlightbackground="#3D404B", highlightcolor="#206DB4")
-    new_email_label = Label(win, text='• Email', fg="#FFFFFF", bg='#272A37',
+    new_email_label = Label(window, text='• Email', fg="#FFFFFF", bg='#272A37',
                             font=("yu gothic ui", 11, 'bold'))
     new_email_label.place(x=40, y=390)
     # ====================== Random and Submit buttons ====================
-    random_btn = Button(win, fg='#f8f8f8', text='Random', bg='#1D90F5', font=("yu gothic ui", 12, "bold"),
+    random_btn = Button(window, fg='#f8f8f8', text='Random', bg='#1D90F5', font=("yu gothic ui", 12, "bold"),
                         cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
                         command=lambda: random_btn_fnc()
                         )
     random_btn.place(x=235, y=240, width=70, height=50)
 
-    submit_btn = Button(win, fg='#f8f8f8', text='Save', bg='#1D90F5', font=("yu gothic ui", 12, "bold"),
+    submit_btn = Button(window, fg='#f8f8f8', text='Save', bg='#1D90F5', font=("yu gothic ui", 12, "bold"),
                         cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
                         command=lambda: register_new_app(new_app_entry.get(), new_user_entry.get(),
                                                          new_pass_entry.get(), new_confirm_pass_entry.get(),
@@ -352,6 +342,24 @@ def add_new_app_frame():
         new_pass_entry.insert(0, rnd_password)
         new_confirm_pass_entry.delete(0, END)
         new_confirm_pass_entry.insert(0, rnd_password)
+
+    def register_new_app(app_name: str, new_username_entry: str, password_entry: str, confirm_password_entry: str,
+                         new_email: str) -> None:
+        """
+        Registers new application in database for one user_id
+        """
+        newpassword = str(password_entry)
+        confirm_newpassword = str(confirm_password_entry)
+        global user_id
+        if app_name == "" or new_username_entry == "" or password_entry == "" or new_email == "":
+            messagebox.showerror("Error", "All Fields Are Required")
+        elif newpassword != confirm_newpassword:
+            messagebox.showerror("Failed", "Passwords did not match")
+        else:
+            pm.AppLoginInfo(app_name, new_username_entry, password_entry, new_email).register_app(user_id)
+            combobox_apps.config(values=app_list())
+            combobox_apps.set("Pick an App")
+            exit_window(window)
 
 
 def update_details_window():
@@ -421,11 +429,12 @@ def update_details_window():
         """
         Updates application login info into database, uses PasswordApp module to update the table
         """
-        pm.PasswordApp.update_details(user_id, app_name, update_username, update_password, update_email)
-        exit_window()
+        pm.AppLoginInfo.update_details(user_id, app_name, update_username, update_password, update_email)
+        exit_window(win)
 
-    def exit_window():
-        win.destroy()
+
+def exit_window(win):
+    win.destroy()
 
 
 # Windows Size and Placement
@@ -675,15 +684,19 @@ combobox_apps = ttk.Combobox(bg_label, width=24, font=('Helvetica', 20), values=
 combobox_apps.set("Pick an app")
 combobox_apps.place(y=70, x=50)
 
-get_button = Button(bg_label, fg='#f8f8f8', text='Get', bg='#1D90F5', font=("yu gothic ui", 14, "bold"), width=15,
+get_button = Button(bg_label, fg='#f8f8f8', text='Get', bg='#1D90F5', font=("yu gothic ui", 14, "bold"), width=9,
                     cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
                     command=app_details)
 get_button.place(y=120, x=50)
-update_button = Button(bg_label, fg='#f8f8f8', text='Update', bg='#1D90F5', font=("yu gothic ui", 14, "bold"), width=15,
+update_button = Button(bg_label, fg='#f8f8f8', text='Update', bg='#1D90F5', font=("yu gothic ui", 14, "bold"), width=9,
                        cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
                        command=update_details_window)
-update_button.place(y=120, x=261)
+update_button.place(y=120, x=190)
 
+remove_button = Button(bg_label, fg='#f8f8f8', text='Remove', bg='#B45D25', font=("yu gothic ui", 14, "bold"), width=9,
+                       cursor='hand2', relief="flat", bd=0, highlightthickness=0, activebackground="#1D90F5",
+                       command=lambda: remove_app())
+remove_button.place(y=120, x=330)
 listbox_details = Listbox(bg_label, bg="#272A37", fg='white', width=25, font=('Constntia', 20))
 listbox_details.place(y=170, x=50)
 

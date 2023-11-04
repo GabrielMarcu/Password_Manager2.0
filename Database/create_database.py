@@ -3,11 +3,12 @@ Creates password_manager.db
 
 Adds login_table and app_table in database
 """
-
+import os.path
 import sqlite3
 
 
 def login_db():
+    os.chdir("D:\Gabriel\Projects\GUI login and sign up form\Database")
     connection = sqlite3.connect('password_manager.db')
     create_login = """
         CREATE TABLE IF NOT EXISTS login_table (
@@ -23,10 +24,11 @@ def login_db():
     cur.execute(create_login)
     connection.commit()
     connection.close()
+    os.chdir("D:\Gabriel\Projects\GUI login and sign up form")
 
 
 def app_db():
-
+    os.chdir("D:\Gabriel\Projects\GUI login and sign up form\Database")
     connection = sqlite3.connect('password_manager.db')
     create_command = """
             CREATE TABLE IF NOT EXISTS app_table (
@@ -43,7 +45,9 @@ def app_db():
     cur.execute(create_command)
     connection.commit()
     connection.close()
+    os.chdir("D:\Gabriel\Projects\GUI login and sign up form")
 
 
-login_db()
-app_db()
+if __name__ == "__main__":
+    login_db()  
+    app_db()

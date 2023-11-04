@@ -15,7 +15,7 @@ import sqlite3
 from tkinter import messagebox
 
 
-class PasswordApp:
+class AppLoginInfo:
     """
     Creates, updates objects in database or removes objects from database
     """
