@@ -49,9 +49,9 @@ def signup():
             connection = sqlite3.connect("Database/password_manager.db")
             cur = connection.cursor()
             cur.execute("SELECT count(*) FROM login_table;")
-            id = cur.fetchall()[0][0] + 1
+            login_id = cur.fetchall()[0][0] + 1
             cur.execute("INSERT INTO login_table(id, username, password, email) VALUES(?,?,?,?)",
-                        (id, username_entry.get(), passwordName_entry.get(), emailName_entry.get()))
+                        (login_id, username_entry.get(), passwordName_entry.get(), emailName_entry.get()))
             connection.commit()
             connection.close()
             clear_sign_up()
@@ -155,7 +155,7 @@ def forgot_password():
                              command=lambda: change_password())
         update_pass.place(x=40, y=260, width=256, height=45)
     except Exception as e:
-        messagebox.showerror("Error", f"{e}, happened in forgot password frame")
+        messagebox.showerror("Error", f"{e}, Something went wrong in  forgot password frame, Try again")
 
     def change_password():
         try:
@@ -225,7 +225,6 @@ def app_list() -> list:
         find_apps = "SELECT app_name FROM app_table WHERE user_id=?"
         cursor.execute(find_apps, (str(user_id),))
         ap_list = cursor.fetchall()
-        print(ap_list)
         connection.commit()
         connection.close()
         return ap_list
