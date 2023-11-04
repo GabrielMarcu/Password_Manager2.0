@@ -46,6 +46,6 @@ Functions:
 [![Watch the video](https://img.youtube.com/vi/OKB0HTz2Y4g/hqdefault.jpg)](https://www.youtube.com/watch?v=OKB0HTz2Y4g)
 
 ## Code behind GUI
-[![Watch the video](https://img.youtube.com/vi/dRmtWc1uqO0&t=1s/hqdefault.jpg)](https://www.youtube.com/watch?v=dRmtWc1uqO0&t=1s)
+[![Watch the video](https://img.youtube.com/vi/dRmtWc1uqO0&t/default.jpg)](https://www.youtube.com/watch?v=dRmtWc1uqO0&t)
 
 
